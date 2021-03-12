@@ -71,12 +71,10 @@ export default {
         console.log(valid)
         if (!valid) return
         const { data } = await this.axios.post('login', this.loginForm)
-        console.log(data.meta.status)
         if (data.meta.status !== 200) return this.$message.error(data.meta.msg)
         this.$message.success(data.meta.msg)
 
         // 登陆成功之后将token存到 sessionStorage
-        console.log(data)
         window.sessionStorage.setItem('token', data.data.token)
         // 跳转页面
         this.$router.push('/home')
