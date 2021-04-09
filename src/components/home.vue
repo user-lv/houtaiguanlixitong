@@ -25,72 +25,32 @@
             <el-col :span="12">
               <el-menu
                 unique-opened
-                class="el-menu-vertical-demo"
+                router
                 background-color="#545c64"
                 text-color="#fff"
                 active-text-color="#ffd04b"
               >
-                <el-submenu index="1">
+                <!-- 一级菜单 -->
+                <el-submenu
+                  :index="item.id + ''"
+                  v-for="item in menuList"
+                  :key="item.id"
+                >
                   <template slot="title">
-                    <i class="iconfont icon-users"></i>
-                    <span> 用户管理</span>
+                    <!-- 图标 -->
+                    <i :class="iconFonts[item.id]"></i>
+                    <!-- 文本 -->
+                    <span>{{ item.authName }}</span>
                   </template>
+                  <!-- 二级菜单 -->
                   <el-menu-item-group>
-                    <el-menu-item index="1-1" class="el-icon-menu">
-                      用户列表</el-menu-item
+                    <el-menu-item
+                      class="el-icon-menu"
+                      v-for="items in item.children"
+                      :key="items.id"
+                      :index="'/' + items.path"
                     >
-                  </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="2">
-                  <template slot="title">
-                    <i class="iconfont icon-tijikongjian"></i>
-                    <span> 权限管理</span>
-                  </template>
-                  <el-menu-item-group>
-                    <el-menu-item index="2-1" class="el-icon-menu">
-                      角色列表</el-menu-item
-                    >
-                    <el-menu-item index="2-2" class="el-icon-menu">
-                      权限列表</el-menu-item
-                    >
-                  </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="3">
-                  <template slot="title">
-                    <i class="iconfont icon-shangpin"></i>
-                    <span> 商品管理</span>
-                  </template>
-                  <el-menu-item-group>
-                    <el-menu-item index="3-1" class="el-icon-menu">
-                      商品列表</el-menu-item
-                    >
-                    <el-menu-item index="3-2" class="el-icon-menu">
-                      分类参数</el-menu-item
-                    >
-                    <el-menu-item index="3-3" class="el-icon-menu">
-                      商品分类</el-menu-item
-                    >
-                  </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="4">
-                  <template slot="title">
-                    <i class="iconfont icon-danju"></i>
-                    <span> 订单管理</span>
-                  </template>
-                  <el-menu-item-group>
-                    <el-menu-item index="4-1" class="el-icon-menu">
-                      订单列表</el-menu-item
-                    >
-                  </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="5">
-                  <template slot="title">
-                    <i class="iconfont icon-baobiao"></i>
-                    <span> 数据统计</span>
-                  </template>
-                  <el-menu-item-group>
-                    <el-menu-item index="5-1" class="el-icon-menu">
-                      数据列表</el-menu-item
+                      {{ items.authName }}</el-menu-item
                     >
                   </el-menu-item-group>
                 </el-submenu>
@@ -99,7 +59,9 @@
           </el-row>
         </el-aside>
         <!-- 主要内容 -->
-        <el-main>Main</el-main>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -107,7 +69,16 @@
 <script>
 export default {
   data () {
-    return {}
+    return {
+      menuList: [],
+      iconFonts: {
+        125: 'iconfont icon-user',
+        103: 'iconfont icon-lock_fill',
+        101: 'iconfont icon-shangpin',
+        102: 'iconfont icon-danju',
+        145: 'iconfont icon-baobiao'
+      }
+    }
   },
   created () {
     this.getMenuList()
@@ -118,10 +89,10 @@ export default {
       this.$router.push('/login')
     },
     async getMenuList () {
+      // 菜单列表
       const { data: res } = await this.axios.get('menus')
-      const token = window.sessionStorage.getItem('token')
-      console.log(token)
-      console.log(res)
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.menuList = res.data
     }
   }
 }
@@ -180,6 +151,8 @@ export default {
 .el-menu {
   width: 200px;
   height: 525px;
-  text-indent: 10px;
+}
+.iconfont {
+  margin-right: 10px;
 }
 </style>
