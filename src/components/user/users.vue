@@ -1,5 +1,6 @@
 <template>
   <div class="users">
+    <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
@@ -112,6 +113,33 @@
           <el-button type="primary" @click="editUser()">确 定</el-button>
         </span>
       </el-dialog>
+
+      <!-- 分配角色对话框 -->
+      <el-dialog title="分配角色" :visible.sync="fenpeiUserVisible" width="60%">
+        <div>
+          <p>当前的用户:{{ userInfo.username }}</p>
+          <p>当前的角色:{{ userInfo.role_name }}</p>
+          <p>
+            分配新角色:
+            <el-select v-model="selectedRoleId" placeholder="请选择">
+              <el-option
+                v-for="item in roleList"
+                :key="item.id"
+                :label="item.roleName"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </p>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="cancelFenpeiDialog()">取 消</el-button>
+          <el-button type="primary" @click="fenpeiUserButton()"
+            >确 定</el-button
+          >
+        </span>
+      </el-dialog>
+
       <!-- 表格区域 -->
       <template>
         <el-table border stripe style="width: 100%" :data="this.usersList">
@@ -182,6 +210,7 @@
                   round
                   size="small"
                   icon="el-icon-setting"
+                  @click="fenpeiUser(scope.row)"
                 ></el-button>
               </el-tooltip>
             </template>
@@ -253,7 +282,15 @@ export default {
           { message: '请输入11位手机号码', trigger: 'blur' },
           { validator: checkMobile, trigger: 'blur' }
         ]
-      }
+      },
+      // 分配角色对话框显示
+      fenpeiUserVisible: false,
+      // 分配权限用户信息
+      userInfo: [],
+      // 被选中的角色id
+      selectedRoleId: '',
+      // 角色列表数据
+      roleList: []
     }
   },
   created () {
@@ -269,7 +306,6 @@ export default {
           query: this.query
         }
       })
-      console.log(this.query)
       this.usersList = res.data.users
       this.total = res.data.total
       console.log(res)
@@ -369,12 +405,7 @@ export default {
           confirmButtonText: '确定',
           type: 'warning'
         }
-      ).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
-      })
+      ).catch(err => err)
       if (confirmResult === 'confirm') {
         console.log(111)
         this.axios.delete('/users/' + id)
@@ -384,6 +415,43 @@ export default {
           message: '删除成功!'
         })
       }
+    },
+    async fenpeiUser (info) {
+      this.userInfo = info
+
+      // 获取所有角色列表
+      const { data: res } = await this.axios.get('/roles/')
+      if (res.meta.status !== 200) {
+        return this.$message.error('角色列表获取失败')
+      }
+      this.roleList = res.data
+      this.fenpeiUserVisible = true
+      console.log(info)
+    },
+    // 关闭分配角色色对话框
+    cancelFenpeiDialog () {
+      this.roleList = []
+      this.selectedRoleId = ''
+      this.fenpeiUserVisible = false
+      this.$message.info('角色分配取消')
+    },
+    // 分配角色按钮
+    async fenpeiUserButton () {
+      const { data: res } = await this.axios.put(
+        `users/${this.userInfo.id}/role/`,
+        {
+          rid: this.selectedRoleId
+        }
+      )
+      console.log(res)
+      if (res.meta.status !== 200) {
+        return this.$message.error('角色分配失败')
+      }
+      this.roleList = []
+      this.selectedRoleId = ''
+      this.getUsersList()
+      this.fenpeiUserVisible = false
+      this.$message.success('角色分配成功')
     }
   }
 }
