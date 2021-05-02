@@ -29,6 +29,7 @@
                 background-color="#545c64"
                 text-color="#fff"
                 active-text-color="#ffd04b"
+                :default-active="$route.path"
               >
                 <!-- 一级菜单 -->
                 <el-submenu

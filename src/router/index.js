@@ -7,6 +7,7 @@ import users from './../components/user/users.vue'
 import rights from './../components/rights/rights.vue'
 import roles from './../components/rights/roles.vue'
 import goods from './../components/goods/goods.vue'
+import cate from './../components/goods/cate.vue'
 
 Vue.use(VueRouter)
 
@@ -22,7 +23,8 @@ const routes = [
       { path: '/users', component: users },
       { path: '/rights', component: rights },
       { path: '/roles', component: roles },
-      { path: '/goods', component: goods }
+      { path: '/goods', component: goods },
+      { path: '/categories', component: cate }
     ]
   }
 ]
@@ -30,6 +32,7 @@ const routes = [
 const router = new VueRouter({
   routes
 })
+
 // 路由导航守卫
 router.beforeEach((to, from, next) => {
   if (to.path === '/login') return next()
